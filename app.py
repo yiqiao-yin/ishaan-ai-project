@@ -1,6 +1,9 @@
 import streamlit as st
+import openai
 
 st.write("hello world Yiqiao!")
+
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def call_chatgpt(prompt: str) -> str:
     """
