@@ -54,6 +54,11 @@ def call_langchain(prompt: str) -> str:
     return output
 
 question = st.text_input('Enter a question here', 'Tell me a joke')
-response = call_chatgpt(question)
+ref_from_internet = call_langchain(question)
+engineered_prompt = f"""
+    Based on the context: {ref_from_internet},
+    answer the user question: {question}
+"""
+response = call_chatgpt(engineered_prompt)
 st.write(response)
 
