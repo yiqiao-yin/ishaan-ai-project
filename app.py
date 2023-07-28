@@ -87,13 +87,10 @@ def add_dist_score_column(
 
 df = pd.read_csv("mckinsey-covid-report.csv")
 
-df_screened_by_dist_score = add_dist_score_column(
-    df, user_input
-)
-
-
-
 question = st.text_input('Enter a question here', 'Tell me a joke')
+df_screened_by_dist_score = add_dist_score_column(
+    df, question
+)
 ref_from_internet = call_langchain(question)
 ref_from_covid_data = df_screened_by_dist_score.answers
 engineered_prompt = f"""
