@@ -89,17 +89,43 @@ def add_dist_score_column(
 
 df = pd.read_csv("mckinsey-covid-report.csv")
 
-question = st.text_input('Enter a question here', 'Tell me a joke')
-df_screened_by_dist_score = add_dist_score_column(
-    df, question
-)
-ref_from_internet = call_langchain(question)
-ref_from_covid_data = df_screened_by_dist_score.answers
-engineered_prompt = f"""
-    Based on the context: {ref_from_internet},
-    and based on more context: {ref_from_covid_data},
-    answer the user question: {question}
-"""
-response = call_chatgpt(engineered_prompt)
-st.write(response)
+# Check if "messages" is not stored in session state and set it to an empty list
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
+# Iterate over each message in the session state messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Create a dictionary with the current question and answer
+assistant_prompt = {
+    "role": "assistant",
+    "content": "You are a helpful AI assistant for the user.",
+}
+
+# Get user input from chat_input and store it in the prompt variable using the walrus operator ":="
+if prompt := st.chat_input("What is up?"):
+    # Add user message to session state messages
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    df_screened_by_dist_score = add_dist_score_column(
+        df, prompt
+    )
+    ref_from_internet = call_langchain(prompt)
+    ref_from_covid_data = df_screened_by_dist_score.answers
+    engineered_prompt = f"""
+        Based on the context: {ref_from_internet},
+        and based on more context: {ref_from_covid_data},
+        answer the user question: {prompt}
+    """
+    response = call_chatgpt(engineered_prompt)
+
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        st.markdown(response)
+
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": response})
